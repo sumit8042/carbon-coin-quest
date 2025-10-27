@@ -25,6 +25,7 @@ const Calculator = () => {
 
   // Food state
   const [dietType, setDietType] = useState("");
+  const [foodQuantity, setFoodQuantity] = useState("");
 
   useEffect(() => {
     checkUser();
@@ -63,13 +64,13 @@ const Calculator = () => {
     return kwh * (emissionFactors[source] || 0);
   };
 
-  const calculateFoodEmissions = (diet: string): number => {
+  const calculateFoodEmissions = (diet: string, quantity: number): number => {
     const emissionFactors: { [key: string]: number } = {
       "non-vegetarian": 7.2,
       "vegetarian": 3.8,
       "vegan": 2.9,
     };
-    return emissionFactors[diet] || 0;
+    return (emissionFactors[diet] || 0) * quantity;
   };
 
   const handleTravelSubmit = async (e: React.FormEvent) => {
@@ -157,14 +158,15 @@ const Calculator = () => {
     if (!userId) return;
 
     setLoading(true);
-    const emissions = calculateFoodEmissions(dietType);
+    const quantity = parseFloat(foodQuantity);
+    const emissions = calculateFoodEmissions(dietType, quantity);
 
     const { error } = await supabase.from("emissions").insert({
       user_id: userId,
       category: "food",
       amount: emissions,
       diet_type: dietType,
-      details: { diet: dietType },
+      details: { diet: dietType, quantity },
     });
 
     if (error) {
@@ -186,6 +188,7 @@ const Calculator = () => {
       }
       
       setDietType("");
+      setFoodQuantity("");
     }
     setLoading(false);
   };
@@ -301,7 +304,7 @@ const Calculator = () => {
               <TabsContent value="food" className="space-y-4 mt-6">
                 <form onSubmit={handleFoodSubmit} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="diet">Diet Type (per day)</Label>
+                    <Label htmlFor="diet">Diet Type</Label>
                     <Select value={dietType} onValueChange={setDietType} required>
                       <SelectTrigger>
                         <SelectValue placeholder="Select diet type" />
@@ -312,8 +315,22 @@ const Calculator = () => {
                         <SelectItem value="vegan">Vegan</SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="quantity">Number of Meals</Label>
+                    <Input
+                      id="quantity"
+                      type="number"
+                      placeholder="3"
+                      value={foodQuantity}
+                      onChange={(e) => setFoodQuantity(e.target.value)}
+                      required
+                      min="0.1"
+                      step="0.1"
+                    />
                     <p className="text-sm text-muted-foreground">
-                      This calculates average daily emissions based on diet type
+                      Daily emissions will be calculated per meal based on diet type
                     </p>
                   </div>
 
