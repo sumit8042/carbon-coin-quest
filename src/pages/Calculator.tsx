@@ -73,6 +73,14 @@ const Calculator = () => {
     return (emissionFactors[diet] || 0) * quantity;
   };
 
+  const calculateCoinsFromEmissions = (emissions: number): number => {
+    if (emissions < 1) return 20;
+    if (emissions < 3) return 15;
+    if (emissions < 5) return 10;
+    if (emissions < 10) return 5;
+    return 1;
+  };
+
   const handleTravelSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!userId) return;
@@ -92,7 +100,8 @@ const Calculator = () => {
     if (error) {
       toast.error("Failed to save emissions");
     } else {
-      toast.success(`Added ${emissions.toFixed(2)} kg CO₂ from travel! +10 coins 🪙`);
+      const coinsEarned = calculateCoinsFromEmissions(emissions);
+      toast.success(`Added ${emissions.toFixed(2)} kg CO₂ from travel! +${coinsEarned} coins 🪙`);
       // Award coins
       const { data: profile } = await supabase
         .from("profiles")
@@ -103,7 +112,7 @@ const Calculator = () => {
       if (profile) {
         await supabase
           .from("profiles")
-          .update({ coins: profile.coins + 10 })
+          .update({ coins: profile.coins + coinsEarned })
           .eq("user_id", userId);
       }
       
@@ -132,7 +141,8 @@ const Calculator = () => {
     if (error) {
       toast.error("Failed to save emissions");
     } else {
-      toast.success(`Added ${emissions.toFixed(2)} kg CO₂ from electricity! +10 coins 🪙`);
+      const coinsEarned = calculateCoinsFromEmissions(emissions);
+      toast.success(`Added ${emissions.toFixed(2)} kg CO₂ from electricity! +${coinsEarned} coins 🪙`);
       // Award coins
       const { data: profile } = await supabase
         .from("profiles")
@@ -143,7 +153,7 @@ const Calculator = () => {
       if (profile) {
         await supabase
           .from("profiles")
-          .update({ coins: profile.coins + 10 })
+          .update({ coins: profile.coins + coinsEarned })
           .eq("user_id", userId);
       }
       
@@ -172,7 +182,8 @@ const Calculator = () => {
     if (error) {
       toast.error("Failed to save emissions");
     } else {
-      toast.success(`Added ${emissions.toFixed(2)} kg CO₂ from food! +10 coins 🪙`);
+      const coinsEarned = calculateCoinsFromEmissions(emissions);
+      toast.success(`Added ${emissions.toFixed(2)} kg CO₂ from food! +${coinsEarned} coins 🪙`);
       // Award coins
       const { data: profile } = await supabase
         .from("profiles")
@@ -183,7 +194,7 @@ const Calculator = () => {
       if (profile) {
         await supabase
           .from("profiles")
-          .update({ coins: profile.coins + 10 })
+          .update({ coins: profile.coins + coinsEarned })
           .eq("user_id", userId);
       }
       
