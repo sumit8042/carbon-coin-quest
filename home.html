@@ -1,0 +1,18 @@
+<script type="module">
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm"
+
+const supabase = createClient(
+  "https://YOUR_PROJECT_ID.supabase.co",
+  "YOUR_ANON_KEY"
+)
+
+// Check if user is logged in
+const { data: { user } } = await supabase.auth.getUser()
+
+if (!user) {
+  // Not logged in → redirect
+  window.location.href = "index.html"
+} else {
+  console.log("Logged in user:", user.email)
+}
+</script>
